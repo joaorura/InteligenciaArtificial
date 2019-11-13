@@ -12,7 +12,7 @@ class Process:
         if error is not None:
             raise ValueError(error)
 
-    def __init__(self, amount_c, amount_m, limit):
+    def __init__(self, amount_c, amount_m, size_boat, limit):
         self.amount_m = amount_m
         self.amount_c = amount_c
         self._error_detect()
