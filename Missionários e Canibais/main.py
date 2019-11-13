@@ -12,21 +12,44 @@ class Process:
         if error is not None:
             raise ValueError(error)
 
-    def __init__(self, amount_c, amount_m):
+    def __init__(self, amount_c, amount_m, limit):
         self.amount_m = amount_m
         self.amount_c = amount_c
-
         self._error_detect()
 
+        self.queue = []
         self.path = []
+        self.limit = limit
 
         first = [amount_m, amount_c]
         self.end = first
         boat = [0, 0]
         second = [0, 0]
 
-        self.begin = [2, boat, first, second]
+        self.begin = [2, boat, first, second, None]
         self.border = self._generate_states(self.begin)
+
+    def put(self, _list):
+        if len(_list) == 0:
+            return
+
+        if len(self.queue) == self.limit:
+            del self.queue[0]
+
+        if type(_list) == type(_list[0]):
+            self.queue += _list
+        else:
+            self.queue.append(_list)
+
+    @staticmethod
+    def append(list_1, list_2):
+        if len(list_2) == 0:
+            return
+
+        if type(list_2) == type(list_2[0]):
+            list_1 += list_2
+        else:
+            list_1.append(list_2)
 
     @staticmethod
     def increase(i):
@@ -37,48 +60,63 @@ class Process:
         return i
 
     def transfer(self, state):
-        state = deepcopy(state)
+        aux = deepcopy(state)
+        aux[4] = state
+        i = aux[0] = \
+            self.increase(aux[0])
 
-        i = state[0]
+        aux[i][0] += aux[1][0]
+        aux[i][1] += aux[1][1]
 
-        state[0] = self.increase(i)
-        state[i][0] += state[1][0]
-        state[i][1] += state[1][1]
+        aux[1][0] = \
+            aux[1][1] = 0
 
-        state[1][0] = \
-            state[1][0] = 0
-
-        return state
+        return aux
 
     def _boat_generate(self, state):
         elements = []
         i = state[0]
-        new = self.increase(i)
 
-        if state[i][0] >= state[i][1]:
-            aux = deepcopy(state)
-            aux[0] = new
-            aux[i][1] -= 1
-            aux[1][0] = 0
+        aux = deepcopy(state)
+        aux[4] = state
+        aux[i][0] -= 1
+        aux[1][0] = 1
+        aux[1][1] = 0
+        elements.append(aux)
+
+        aux = deepcopy(state)
+        aux[4] = state
+        aux[i][1] -= 1
+        aux[1][0] = 0
+        aux[1][1] = 1
+        elements.append(aux)
+
+        aux = deepcopy(state)
+        aux[4] = state
+        aux[i][0] -= 1
+        aux[i][1] -= 1
+        aux[1][0] = \
             aux[1][1] = 1
+        elements.append(aux)
 
-            elements.append(aux)
+        i = 0
+        while True:
+            if i == len(elements):
+                break
 
-            aux = deepcopy(state)
-            aux[0] = new
-            aux[i][0] -= 1
-            aux[i][1] -= 1
-            aux[1][0] = \
-                aux[1][1] = 1
-            elements.append(aux)
+            aux = elements[i]
 
-        if state[i][0] > state[i][1]:
-            aux = deepcopy(state)
-            aux[0] = new
-            aux[i][0] -= 1
-            aux[1][0] = 1
-            aux[1][1] = 0
-            elements.append(aux)
+            if aux in self.queue or aux == state[4]:
+                del elements[i]
+                break
+            else:
+                for j in range(2, 4):
+                    if aux[j][0] < 0 or aux[j][1] < 0 or aux[j][0] < aux[j][1]:
+                        del elements[i]
+                        i -= 1
+                        break
+
+            i += 1
 
         return elements
 
@@ -86,22 +124,28 @@ class Process:
         if state[1][0] != 0 or state[1][1] != 0:
             return self.transfer(state)
         else:
-            aux = self._boat_generate(state)
-            return aux
+            return self._boat_generate(state)
 
     def start(self):
         while True:
             if len(self.border) == 0:
-                return None
+                return 'No ways'
 
-            aux = self.border[0]
+            aux = deepcopy(self.border[0])
+            self.path.append(aux)
             del self.border[0]
 
-            if aux == self.end:
-                self.path.append(aux)
+            print(aux[0:3])
+            print(self.border)
+            print('\n-----x-----\n')
+
+            if aux[3] == self.end:
                 return self.path
 
-            self.border.append(self._generate_states(aux))
+            aux = self._generate_states(aux)
+
+            self.put(aux)
+            self.append(self.border, aux)
 
 
 def read_number(presentation, error='Error reading.\n\tPlease enter the data again!'):
@@ -117,7 +161,7 @@ def main():
     amount_m = read_number('Enter the number of missionaries')
     amount_c = read_number('Enter the amount of cannibals')
 
-    problem = Process(amount_m, amount_c)
+    problem = Process(amount_m, amount_c, 100)
     print(problem.start())
 
 
