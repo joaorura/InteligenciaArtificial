@@ -1,3 +1,6 @@
+from copy import deepcopy
+
+
 class Process:
     def _error_detect(self):
         error = None
@@ -28,13 +31,13 @@ class Process:
     @staticmethod
     def increase(i):
         i += 1
-        if i == 3:
-            i = 1
+        if i == 4:
+            i = 2
 
         return i
 
     def transfer(self, state):
-        state = state[:]
+        state = deepcopy(state)
 
         i = state[0]
 
@@ -53,26 +56,28 @@ class Process:
         new = self.increase(i)
 
         if state[i][0] >= state[i][1]:
-            aux = state[:]
+            aux = deepcopy(state)
             aux[0] = new
             aux[i][1] -= 1
+            aux[1][0] = 0
             aux[1][1] = 1
 
             elements.append(aux)
 
-            aux = state[:]
+            aux = deepcopy(state)
             aux[0] = new
             aux[i][0] -= 1
             aux[i][1] -= 1
             aux[1][0] = \
-                aux[1][0] = 1
+                aux[1][1] = 1
             elements.append(aux)
 
         if state[i][0] > state[i][1]:
-            aux = state[:]
+            aux = deepcopy(state)
             aux[0] = new
             aux[i][0] -= 1
             aux[1][0] = 1
+            aux[1][1] = 0
             elements.append(aux)
 
         return elements
