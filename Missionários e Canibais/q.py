@@ -18,7 +18,7 @@ class _Queue:
     def __str__(self):
         _str = '['
         for i in self.queue:
-            _str += f'{i}, '
+            _str += f'{i} // '
 
         _str += ']'
         return _str

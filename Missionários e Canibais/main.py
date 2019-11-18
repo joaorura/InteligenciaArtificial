@@ -12,10 +12,11 @@ class Problem:
             raise ValueError
 
         self.border = _Queue()
+        self.queue = _Queue(100)
 
         self.m = [m, 0]
         self.c = [c, 0]
-        root = Node(1, self.m, self.c, _Queue(100))
+        root = Node(1, self.m, self.c)
 
         self.tree = Tree(root)
 
@@ -25,15 +26,17 @@ class Problem:
 
     @staticmethod
     def _get_path(node):
-        path = []
+        path = [node]
 
         while True:
-            aux = node.father
+            node = node.father
 
-            if aux is None:
-                return path
+            if node is None:
+                break
             else:
-                path.append(aux)
+                path.append(node)
+
+        return path
 
     def _put_in_border(self, elements):
         for i in elements:
@@ -50,10 +53,10 @@ class Problem:
             now = self.border.get()
             print(f'The: {now}')
             print(f'Border: {self.border}')
-            if now == self.end:
+            if now.m == [0, 3] and now.c == [0, 3]:
                 return self._get_path(now)
 
-            kids = now.father_children()
+            kids = now.father_children(self.queue)
             self._put_in_border(kids)
 
 

@@ -3,7 +3,7 @@ from copy import deepcopy
 
 
 class Node:
-    def __init__(self, time, m, c, queue=None, father=None):
+    def __init__(self, time, m, c, father=None):
         utils.check_type(list, m)
         utils.check_type(list, c)
 
@@ -12,7 +12,6 @@ class Node:
         self.c = c
         self.father = father
         self.children = []
-        self.queue = queue
 
     def __eq__(self, other):
         return type(other) == Node and self.m == other.m and \
@@ -53,7 +52,8 @@ class Node:
 
         return aux_node
 
-    def _filter_elements(self, elements):
+    @staticmethod
+    def _filter_elements(elements, queue=None):
         aux = 0
         while True:
             if aux == len(elements):
@@ -61,27 +61,34 @@ class Node:
 
             i = elements[aux]
 
-            if (i is None) or (i.c[0] > i.m[0] > 0) \
-                    or (i.c[1] > i.m[1] > 0) or (i in self.queue):
+            test = (i is None) or (i.c[0] > i.m[0] > 0) or \
+                   (i.c[1] > i.m[1] > 0) or i.father == i
+            if queue is not None:
+                test = test or i in queue
+            if test:
                 del elements[aux]
                 aux -= 1
 
             aux += 1
 
-    def father_children(self):
+    def father_children(self, queue=None):
         elements = []
         j = self.time
         i = self.next_time(j)
 
-        aux_0 = self._m_time(i, j, self)
-        elements.append(aux_0)
-        elements.append(self._c_time(i, j, self))
-        elements.append(self._c_time(i, j, aux_0))
+        aux_m = self._m_time(i, j, self)
+        aux_c = self._c_time(i, j, self)
 
-        self._filter_elements(elements)
-        if self.queue is not None:
+        elements.append(aux_m)
+        elements.append(aux_c)
+        elements.append(self._m_time(i, j, aux_c))
+        elements.append(self._m_time(i, j, aux_m))
+        elements.append(self._c_time(i, j, aux_c))
+
+        self._filter_elements(elements, queue)
+        if queue is not None:
             for i in elements:
-                self.queue.put(i)
+                queue.put(i)
         self.add_children(elements)
 
         return elements
