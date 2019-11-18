@@ -66,7 +66,7 @@ class Problem:
 
 
 def main():
-    problem = Problem(3, 3, 3, 3, 10)
+    problem = Problem(3, 3, 3, 3)
     print(problem.get_result())
 
 
