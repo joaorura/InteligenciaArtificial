@@ -1,167 +1,64 @@
-from copy import deepcopy
+from q import _Queue
+from tree import Node, Tree
+import utils
 
 
-class Process:
-    def _error_detect(self):
-        error = None
-        if type(self.amount_m) != int or type(self.amount_c) != int:
-            error = 'Error in type of arguments\n'
-        elif self.amount_m < self.amount_c:
-            error = 'Error instantiating class!\n\tMissionaries less than cannibals.'
+class Problem:
+    def __init__(self, m, c, m_end, c_end):
+        utils.check_type(int, m)
+        utils.check_type(int, c)
 
-        if error is not None:
-            raise ValueError(error)
+        if m < c:
+            raise ValueError
 
-    def __init__(self, amount_c, amount_m, size_boat, limit):
-        self.amount_m = amount_m
-        self.amount_c = amount_c
-        self._error_detect()
+        self.border = _Queue()
 
-        self.queue = []
-        self.path = []
-        self.limit = limit
+        self.m = [m, 0]
+        self.c = [c, 0]
+        root = Node(1, self.m, self.c, _Queue(100))
 
-        first = [amount_m, amount_c]
-        self.end = first
-        boat = [0, 0]
-        second = [0, 0]
+        self.tree = Tree(root)
 
-        self.begin = [2, boat, first, second, None]
-        self.border = self._generate_states(self.begin)
-
-    def put(self, _list):
-        if len(_list) == 0:
-            return
-
-        if len(self.queue) == self.limit:
-            del self.queue[0]
-
-        if type(_list) == type(_list[0]):
-            self.queue += _list
-        else:
-            self.queue.append(_list)
+        m_end = [0, m_end]
+        c_end = [0, c_end]
+        self.end = Node(0, m_end, c_end)
 
     @staticmethod
-    def append(list_1, list_2):
-        if len(list_2) == 0:
-            return
+    def _get_path(node):
+        path = []
 
-        if type(list_2) == type(list_2[0]):
-            list_1 += list_2
-        else:
-            list_1.append(list_2)
-
-    @staticmethod
-    def increase(i):
-        i += 1
-        if i == 4:
-            i = 2
-
-        return i
-
-    def transfer(self, state):
-        aux = deepcopy(state)
-        aux[4] = state
-        i = aux[0] = \
-            self.increase(aux[0])
-
-        aux[i][0] += aux[1][0]
-        aux[i][1] += aux[1][1]
-
-        aux[1][0] = \
-            aux[1][1] = 0
-
-        return aux
-
-    def _boat_generate(self, state):
-        elements = []
-        i = state[0]
-
-        aux = deepcopy(state)
-        aux[4] = state
-        aux[i][0] -= 1
-        aux[1][0] = 1
-        aux[1][1] = 0
-        elements.append(aux)
-
-        aux = deepcopy(state)
-        aux[4] = state
-        aux[i][1] -= 1
-        aux[1][0] = 0
-        aux[1][1] = 1
-        elements.append(aux)
-
-        aux = deepcopy(state)
-        aux[4] = state
-        aux[i][0] -= 1
-        aux[i][1] -= 1
-        aux[1][0] = \
-            aux[1][1] = 1
-        elements.append(aux)
-
-        i = 0
         while True:
-            if i == len(elements):
-                break
+            aux = node.father
 
-            aux = elements[i]
-
-            if aux in self.queue or aux == state[4]:
-                del elements[i]
-                break
+            if aux is None:
+                return path
             else:
-                for j in range(2, 4):
-                    if aux[j][0] < 0 or aux[j][1] < 0 or aux[j][0] < aux[j][1]:
-                        del elements[i]
-                        i -= 1
-                        break
+                path.append(aux)
 
-            i += 1
-
-        return elements
-
-    def _generate_states(self, state):
-        if state[1][0] != 0 or state[1][1] != 0:
-            return self.transfer(state)
-        else:
-            return self._boat_generate(state)
+    def _put_in_border(self, elements):
+        for i in elements:
+            self.border.put(i)
 
     def start(self):
+        aux = self.tree.root.father_children()
+        self._put_in_border(aux)
+
         while True:
-            if len(self.border) == 0:
-                return 'No ways'
+            if self.border.empty():
+                return 'No solution'
 
-            aux = deepcopy(self.border[0])
-            self.path.append(aux)
-            del self.border[0]
+            now = self.border.get()
+            print(f'The: {now}')
+            print(f'Border: {self.border}')
+            if now == self.end:
+                return self._get_path(now)
 
-            print(aux[0:3])
-            print(self.border)
-            print('\n-----x-----\n')
-
-            if aux[3] == self.end:
-                return self.path
-
-            aux = self._generate_states(aux)
-
-            self.put(aux)
-            self.append(self.border, aux)
-
-
-def read_number(presentation, error='Error reading.\n\tPlease enter the data again!'):
-    while True:
-        try:
-            _input = int(input(presentation + ': '))
-            return _input
-        except ValueError:
-            print(error)
+            kids = now.father_children()
+            self._put_in_border(kids)
 
 
 def main():
-    amount_m = read_number('Enter the number of missionaries')
-    amount_c = read_number('Enter the amount of cannibals')
-
-    problem = Process(amount_m, amount_c, 100)
+    problem = Problem(3, 3, 3, 3)
     print(problem.start())
 
 
