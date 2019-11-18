@@ -1,32 +1,28 @@
 from q import _Queue
-from tree import Node, Tree
+from node import Node
 import utils
 
 
 class Problem:
-    def __init__(self, m, c, m_end, c_end):
+    def __init__(self, m, c, m_end, c_end, size_queue=100):
         utils.check_type(int, m)
         utils.check_type(int, c)
 
-        if m < c:
+        if m < c or m_end < c_end:
             raise ValueError
 
+        self.result = None
         self.border = _Queue()
-        self.queue = _Queue(100)
+        self.root = Node(1, [m, 0], [c, 0])
 
-        self.m = [m, 0]
-        self.c = [c, 0]
-        root = Node(1, self.m, self.c)
+        self.queue = _Queue(size_queue)
 
-        self.tree = Tree(root)
-
-        m_end = [0, m_end]
-        c_end = [0, c_end]
-        self.end = Node(0, m_end, c_end)
+        self.end = ([0, m_end], [0, c_end])
 
     @staticmethod
     def _get_path(node):
-        path = [node]
+        path = _Queue()
+        path.put(node)
 
         while True:
             node = node.father
@@ -34,16 +30,18 @@ class Problem:
             if node is None:
                 break
             else:
-                path.append(node)
+                path.put(node)
 
+        path.reverse()
         return path
 
     def _put_in_border(self, elements):
         for i in elements:
             self.border.put(i)
 
-    def start(self):
-        aux = self.tree.root.father_children()
+    def _start(self):
+        self.queue.put(self.root)
+        aux = self.root.father_children(self.queue)
         self._put_in_border(aux)
 
         while True:
@@ -51,18 +49,25 @@ class Problem:
                 return 'No solution'
 
             now = self.border.get()
-            print(f'The: {now}')
-            print(f'Border: {self.border}')
-            if now.m == [0, 3] and now.c == [0, 3]:
-                return self._get_path(now)
+            # debug
+            # print(f'The: {now}')
+            # print(f'Border: {self.border}')
+            if now.m == self.end[0] and now.c == self.end[1]:
+                self.result = self._get_path(now)
 
             kids = now.father_children(self.queue)
             self._put_in_border(kids)
 
+    def get_result(self):
+        if self.result is None:
+            self._start()
+
+        return self.result
+
 
 def main():
-    problem = Problem(3, 3, 3, 3)
-    print(problem.start())
+    problem = Problem(3, 3, 3, 3, 10)
+    print(problem.get_result())
 
 
 if __name__ == '__main__':

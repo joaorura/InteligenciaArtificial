@@ -22,35 +22,8 @@ class Node:
 
     @staticmethod
     def next_time(x):
-        return (x + 1) if (x + 1) < 2 else 0
-
-    @staticmethod
-    def _clone_father(i, father):
-        aux_node = deepcopy(father)
-        aux_node.father = father
-        aux_node.time = i
-
-        return aux_node
-
-    def _m_time(self, i, j, node):
-        if node is None or node.m[i] == 0:
-            return None
-
-        aux_node = self._clone_father(i, node)
-        aux_node.m[i] -= 1
-        aux_node.m[j] += 1
-
-        return aux_node
-
-    def _c_time(self, i, j, node):
-        if node is None or node.c[i] == 0:
-            return None
-
-        aux_node = self._clone_father(i, node)
-        aux_node.c[i] -= 1
-        aux_node.c[j] += 1
-
-        return aux_node
+        aux = x + 1
+        return aux if aux < 2 else 0
 
     @staticmethod
     def _filter_elements(elements, queue=None):
@@ -63,25 +36,54 @@ class Node:
 
             test = (i is None) or (i.c[0] > i.m[0] > 0) or \
                    (i.c[1] > i.m[1] > 0) or i.father == i
-            if queue is not None:
+            if (not test) and queue is not None:
                 test = test or i in queue
+
             if test:
                 del elements[aux]
                 aux -= 1
 
             aux += 1
 
+    def _m_time(self, i, j, node):
+        if node is None or node.m[i] == 0:
+            return None
+
+        aux_node = deepcopy(node)
+        aux_node.m[i] -= 1
+        aux_node.m[j] += 1
+
+        return aux_node
+
+    def _c_time(self, i, j, node):
+        if node is None or node.c[i] == 0:
+            return None
+
+        aux_node = deepcopy(node)
+        aux_node.c[i] -= 1
+        aux_node.c[j] += 1
+
+        return aux_node
+
     def father_children(self, queue=None):
-        elements = []
         j = self.time
         i = self.next_time(j)
 
-        aux_m = self._m_time(i, j, self)
-        aux_c = self._c_time(i, j, self)
+        elements = []
+
+        base = deepcopy(self)
+        base.father = self
+        base.children.clear()
+        base.time = i
+
+        aux_m = self._m_time(i, j, base)
+        aux_c = self._c_time(i, j, base)
 
         elements.append(aux_m)
         elements.append(aux_c)
+
         elements.append(self._m_time(i, j, aux_c))
+
         elements.append(self._m_time(i, j, aux_m))
         elements.append(self._c_time(i, j, aux_c))
 
@@ -131,16 +133,3 @@ class Node:
 
     def remove_all_children(self):
         self.children.clear()
-
-
-class Tree:
-    def __init__(self, node):
-        utils.check_type(Node, node)
-
-        self.root = node
-        self.the_last = node
-        self.height = 0
-
-    def add_last(self, node):
-        self.the_last.add_children(node)
-        self.the_last = node
