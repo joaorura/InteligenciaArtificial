@@ -1,31 +1,65 @@
 from utils import check_type
 from queue import PriorityQueue
+from list_s import list_s
+from node import Node
 import data
 
 
 class Problem:
-    def __init__(self, station_initial, station_final, amount_lines, lines, heuristic):
+    def __init__(self, station_initial, line_initial, station_final, amount_lines, lines, heuristic, amount_elements=100):
         check_type(int, station_initial)
         check_type(int, station_final)
         check_type(int, amount_lines)
 
         check_type(list, heuristic)
-        if len(heuristic) != 0:
+        if len(heuristic) == 0:
             raise ValueError
         check_type(list, heuristic[0])
 
         self.station_initial = station_initial
+        self.line_initial = line_initial
         self.station_final = station_final
         self.amount_lines = amount_lines
         self.lines = lines
         self.heuristic = heuristic
 
         self.result = None
-        self.pq = PriorityQueue()
-        self.elements = []
+        self.root = Node(0, station_initial, line_initial)
+        self.border = PriorityQueue()
+        self.elements = list_s(amount_elements)
+
+    def _put_in_border(self, _list):
+        for i in _list:
+            self.border.put(i)
+
+    def _get_path(self, element):
+        _list = [element]
+
+        while True:
+            element = element.father
+
+            if element is None:
+                break
+
+            _list.append(element)
+
+        return _list
 
     def _start(self):
-        pass
+        aux = self.root.generate_children(self)
+        self._put_in_border(aux)
+
+        while True:
+            if self.border.empty():
+                return None
+
+            aux = self.border.get()
+
+            if aux.station == self.station_final:
+                return self._get_path(aux)
+
+            aux = self.root.generate_children(self)
+            self._put_in_border(aux)
 
     def get_result(self):
         if self.result is None:
@@ -35,8 +69,7 @@ class Problem:
 
 
 def main():
-    pass
-    problem = Problem(0, 1, data.graph['amount_colors'], data.graph, data.heuristic)
+    problem = Problem(0, 'B', 1, len(data.heuristic), data.graph, data.heuristic)
     print(problem.get_result())
 
 
