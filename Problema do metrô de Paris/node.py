@@ -26,6 +26,9 @@ class Node:
         check_type(Node, other)
         return self.weight < other.weight
 
+    def __str__(self):
+        return f'|| W: {self.weight} / S: {self.station} / L: {self.line} ||\n'
+
     def add_children(self, kids):
         k_d = type(kids)
 
@@ -44,8 +47,8 @@ class Node:
         base.station = element[0]
 
         if element[1] != self.line:
-            base.weight += 2
-        base.weight += problem.heuristic[self.station][element[0]]
+            base.weight += 4
+        base.weight += problem.heuristic[self.station][element[0]] << 1
 
         return base
 

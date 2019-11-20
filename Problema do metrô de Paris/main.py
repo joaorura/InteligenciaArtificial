@@ -11,8 +11,10 @@ class Problem:
         check_type(int, station_final)
         check_type(int, amount_lines)
 
+        print((station_initial, line_initial), lines.values())
         check_type(list, heuristic)
-        if len(heuristic) == 0:
+        if len(heuristic) == 0 or station_initial not in lines.keys() or \
+                station_final not in lines.keys() or (station_initial, line_initial) not in lines.values():
             raise ValueError
         check_type(list, heuristic[0])
 
@@ -43,9 +45,12 @@ class Problem:
 
             _list.append(element)
 
+        _list.reverse()
+
         return _list
 
     def _start(self):
+        self.elements.put(self.root)
         aux = self.root.generate_children(self)
         self._put_in_border(aux)
 
@@ -63,14 +68,23 @@ class Problem:
 
     def get_result(self):
         if self.result is None:
-            self._start()
+            self. result = self._start()
 
         return self.result
 
 
 def main():
-    problem = Problem(0, 'B', 1, len(data.heuristic), data.graph, data.heuristic)
-    print(problem.get_result())
+    problem = Problem(0, 'B', 5, len(data.heuristic), data.graph, data.heuristic)
+    aux = problem.get_result()
+
+    if aux is None:
+        print('No way')
+        return
+
+    print('{')
+    for i in aux:
+        print(f'\t{i}')
+    print('}')
 
 
 if __name__ == '__main__':
