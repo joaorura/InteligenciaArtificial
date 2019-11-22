@@ -17,6 +17,8 @@ heuristic = [
 
 graph = {
     'amount_colors': 4,
+    'colors': ['B', 'Y', 'R', 'G'],
+    'stations': list(range(0, 14)),
     0: [
         (1, 'B')
     ],

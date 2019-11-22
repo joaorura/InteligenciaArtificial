@@ -1,3 +1,4 @@
+import interface
 from utils import check_type
 from queue import PriorityQueue
 from list_s import list_s
@@ -11,10 +12,9 @@ class Problem:
         check_type(int, station_final)
         check_type(int, amount_lines)
 
-        print((station_initial, line_initial), lines.values())
         check_type(list, heuristic)
         if len(heuristic) == 0 or station_initial not in lines.keys() or \
-                station_final not in lines.keys() or (station_initial, line_initial) not in lines.values():
+                station_final not in lines.keys():
             raise ValueError
         check_type(list, heuristic[0])
 
@@ -58,12 +58,12 @@ class Problem:
             if self.border.empty():
                 return None
 
-            aux = self.border.get()
+            now = self.border.get()
 
-            if aux.station == self.station_final:
-                return self._get_path(aux)
+            if now.station == self.station_final:
+                return self._get_path(now)
 
-            aux = self.root.generate_children(self)
+            aux = now.generate_children(self)
             self._put_in_border(aux)
 
     def get_result(self):
@@ -74,7 +74,9 @@ class Problem:
 
 
 def main():
-    problem = Problem(0, 'B', 5, len(data.heuristic), data.graph, data.heuristic)
+    a, b, c = interface.start()
+
+    problem = Problem(a, b, c, len(data.heuristic), data.graph, data.heuristic)
     aux = problem.get_result()
 
     if aux is None:
