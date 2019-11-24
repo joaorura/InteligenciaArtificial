@@ -42,16 +42,20 @@ class Game:
                 elif aux == 1:
                     count_o += 1
 
-            win += count_x - count_o
+            if count_x < count_o:
+                win += 1
 
-            if count_x == count_o:
-                win += 10
+            if count_o == count_x:
+                win += 1
+
+            if count_o < count_x:
+                win -= 1
 
             if count_x == 3:
-                win -= 100
+                win -= 2
                 winner = 0
             elif count_o == 3:
-                win += 1
+                win += 2
                 winner = 1
 
             if winner is not None:
