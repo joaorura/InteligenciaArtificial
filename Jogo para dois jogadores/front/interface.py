@@ -37,7 +37,7 @@ class Interface:
                 board_line.append(aux_2)
 
                 aux_2 = Button(aux_1, textvariable=aux_2, command=funct((i, j), aux_2),
-                               justify=CENTER, width=30, height=10)
+                               justify=CENTER, font='size: 60', width=5)
                 aux_2.pack(side='left')
 
             self.board.append(board_line)
@@ -48,7 +48,7 @@ class Interface:
         aux = Image.open('front/data/images/background.png')
         aux = ImageTk.PhotoImage(aux)
         frame = Label(self.body[0], image=aux, width=800, justify='center')
-        frame.pack(expand=TRUE)
+        frame.pack()
 
         aux = Label(frame, text='Jogo da Velha', font='size: 50', pady=70, justify='center')
         aux.pack()

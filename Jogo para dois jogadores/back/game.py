@@ -32,7 +32,7 @@ class Game:
             return 2, 0, 0
 
         winner = None
-        win_x = win_o = 0
+        win = 0
         for i in LOCALS:
             count_x = count_o = 0
             for j in i:
@@ -42,22 +42,22 @@ class Game:
                 elif aux == 1:
                     count_o += 1
 
-            if count_o == 0 and count_x > 0:
-                win_x += 1
-            if count_x == 0 and count_o > 0:
-                win_o += 1
+            win += count_x - count_o
+
+            if count_x == count_o:
+                win += 10
 
             if count_x == 3:
-                win_o -= 100
+                win -= 100
                 winner = 0
             elif count_o == 3:
-                win_x -= 100
+                win += 1
                 winner = 1
 
             if winner is not None:
                 break
 
-        return winner, win_x, win_o
+        return winner, win
 
     def make_play(self, pos):
         if self.board[pos[0]][pos[1]] == -1:

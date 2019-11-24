@@ -12,8 +12,7 @@ class Node:
         self.children = []
 
     def avaliation(self):
-        aux = self.game.check()
-        self.weight = aux[2] - aux[1]
+        self.weight = self.game.check()[1]
 
     def copy(self):
         aux = deepcopy(self)
