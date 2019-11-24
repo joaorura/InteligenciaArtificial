@@ -11,6 +11,13 @@ LOCALS = (
     ((0, 2), (1, 1), (2, 0))
 )
 
+values = {
+    0: 0,
+    1: 1,
+    2: 10,
+    3: 100
+}
+
 
 class Game:
     def __init__(self, names=('Jogador 1', 'Jogador 2'), com_active=0):
@@ -19,6 +26,7 @@ class Game:
 
         self.board = []
         self.turn = 0
+        self.winner = None
 
         for i in range(0, 3):
             aux = []
@@ -28,9 +36,6 @@ class Game:
             self.board.append(aux)
 
     def check(self):
-        if self.turn == 9:
-            return 2, 0, 0
-
         winner = None
         win = 0
         for i in LOCALS:
@@ -42,29 +47,25 @@ class Game:
                 elif aux == 1:
                     count_o += 1
 
-            if count_x < count_o:
-                win += 1
-
-            if count_o == count_x:
-                win += 1
-
-            if count_o < count_x:
-                win -= 1
+            win -= values[count_x]
+            win += values[count_o]
 
             if count_x == 3:
-                win -= 2
                 winner = 0
             elif count_o == 3:
-                win += 2
                 winner = 1
 
             if winner is not None:
+                self.winner = winner
                 break
 
-        return winner, win
+        if winner is None and self.turn == 9:
+            return 2, win
+        else:
+            return winner, win
 
     def make_play(self, pos):
-        if self.board[pos[0]][pos[1]] == -1:
+        if self.board[pos[0]][pos[1]] == -1 and self.winner is None:
             self.board[pos[0]][pos[1]] = self.turn % 2
         else:
             return -1

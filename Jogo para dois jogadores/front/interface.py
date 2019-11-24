@@ -2,7 +2,7 @@ from tkinter import *
 from tkinter import messagebox
 from back.game import Game
 from PIL import Image, ImageTk
-
+from math import inf
 from back.ia.main import Problem
 
 

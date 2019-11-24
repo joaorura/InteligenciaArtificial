@@ -1,4 +1,5 @@
 from back.ia.node import Node
+from math import inf
 
 
 class Problem:
@@ -7,15 +8,15 @@ class Problem:
         self.result = None
         self.max_level = max_level
 
-    def _min_max(self, node_father, a=[-1000], b=[1000], level=0):
-        if level == self.max_level:
+    def _min_max(self, node_father, a=[-inf], b=[inf], level=0):
+        if level == self.max_level or node_father.game.winner is not None:
             return node_father.weight
 
         _type = level % 2
         if _type == 0:
-            value = -1000
+            value = inf
         else:
-            value = 1000
+            value = -inf
 
         for i in range(0, len(node_father.game.board)):
             for j in range(0, len(node_father.game.board[i])):
@@ -37,6 +38,7 @@ class Problem:
                             b[0] = min(b[0], value)
 
                     now.weight = value
+
         return value
 
     def _play(self, node):
